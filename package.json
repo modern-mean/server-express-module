@@ -1,0 +1,32 @@
+{
+  "name": "server-express-module",
+  "version": "0.0.1",
+  "description": "Modern-Mean module for express",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modern-mean/server-express-module.git"
+  },
+  "author": "Andrew Throener",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modern-mean/server-express-module/issues"
+  },
+  "homepage": "https://github.com/modern-mean/server-express-module#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "compression": "^1.6.2",
+    "express": "^4.14.0",
+    "express-force-ssl": "^0.3.2",
+    "helmet": "^2.1.2",
+    "morgan": "^1.7.0",
+    "server-destroy": "^1.0.1",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {
+    "modern-mean-build-gulp": "github:modern-mean/build-gulp"
+  }
+}
