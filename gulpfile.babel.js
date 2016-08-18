@@ -2,6 +2,7 @@
 
 import gulp from 'gulp';
 import * as builder from '@modern-mean/build-gulp';
+import del from 'del';
 
 
 function clean() {
