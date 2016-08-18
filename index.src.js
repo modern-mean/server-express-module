@@ -1,3 +1,3 @@
-export express from './dist/express';
-export config from './dist/config';
-export logger from './dist/logger';
+export * from './dist/express';
+export * from './dist/config';
+export * from './dist/logger';
