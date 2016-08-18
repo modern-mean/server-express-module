@@ -1,10 +1,14 @@
 {
-  "name": "server-express-module",
+  "name": "@modern-mean/server-express-module",
   "version": "0.0.1",
   "description": "Modern-Mean module for express",
   "main": "index.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test",
+    "build": "gulp",
+    "preversion": "npm test",
+    "version": "npm run build && git add -A",
+    "postversion": "git push && git push --tags && npm publish --access public"
   },
   "repository": {
     "type": "git",
@@ -27,6 +31,6 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
-    "modern-mean-build-gulp": "github:modern-mean/build-gulp"
+    "@modern-mean/build-gulp": "~0.0.5"
   }
 }
