@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/modern-mean/server-express-module#readme",
   "dependencies": {
+    "@modern-mean/server-config-module": "~0.0.2",
     "@modern-mean/server-logger-module": "~0.0.3",
     "body-parser": "^1.15.2",
     "compression": "^1.6.2",

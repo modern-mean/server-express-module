@@ -3,56 +3,63 @@
 import http from 'http';
 import https from 'https';
 import express from 'express';
-import { MMLogger } from '@modern-mean/server-logger-module';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
-import config from './config';
 import morgan from 'morgan';
 import fs from 'fs';
 import forceSSL from 'express-force-ssl';
 import enableDestroy from 'server-destroy';
 
+import config from './config';
+import { MMLogger } from '@modern-mean/server-logger-module';
+import { MMConfig } from '@modern-mean/server-config-module';
+
 
 export class MMExpress {
 
-  constructor() {
+  constructor(configMerge) {
     //Properties
     this.expressApp = undefined;
     this.httpServer = undefined;
     this.httpsServer = undefined;
 
-    //Initaite logger
-    let logger = new MMLogger(config.logs);
-    this.logger = logger.get();
+    //Initiate config
+    let configModule = new MMConfig(config);
+    configModule.merge(configMerge);
+    this.config = configModule.get();
 
-    this.logger.debug('Express::Constructor::Start', config);
+    //Initaite logger
+    let loggerModule = new MMLogger(this.config.logs);
+    this.logger = loggerModule.get();
+
+    this.logger.debug('Express::Constructor::Start');
     this.expressApp = express();
     this.httpServer = http.createServer(this.expressApp);
-    if (config.https.enable === 'true') {
+    if (this.config.https.enable === 'true') {
       let httpsOptions = {
-        key: fs.readFileSync(config.https.options.key),
-        cert: fs.readFileSync(config.https.options.cert)
+        key: fs.readFileSync(this.config.https.options.key),
+        cert: fs.readFileSync(this.config.https.options.cert)
       };
       this.httpsServer = https.createServer(httpsOptions, this.expressApp);
     }
 
     //Middleware
-    if (config.https.enable === 'true') {
+    if (this.config.https.enable === 'true') {
       this.expressApp.set('forceSSLOptions', {
-        httpsPort: config.https.port
+        httpsPort: this.config.https.port
       });
       this.logger.debug('Express::Middleware::ForceSSL');
       this.expressApp.use(forceSSL);
     }
 
-    if (config.logs.morgan.enable === 'true') {
+    if (this.config.logs.morgan.enable === 'true') {
       this.logger.debug('Express::Middleware::Morgan');
-      this.expressApp.use(morgan(config.logs.morgan.format, config.logs.morgan.options));
+      this.expressApp.use(morgan(this.config.logs.morgan.format, this.config.logs.morgan.options));
     }
 
-    if (config.helmet.enable === 'true') {
+    if (this.config.helmet.enable === 'true') {
       this.logger.debug('Express::Middleware::Helmet');
-      this.expressApp.use(helmet(config.helmet.config));
+      this.expressApp.use(helmet(this.config.helmet.config));
     }
 
     this.logger.verbose('Express::Constructor::Success');
@@ -69,7 +76,7 @@ export class MMExpress {
         reject(err);
       });
       this.logger.debug('Express::Listen::Https::Start');
-      this.httpServer.listen({ port: config.http.port, host: config.host }, () => {
+      this.httpServer.listen({ port: this.config.http.port, host: this.config.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if(process.env.NODE_ENV !== 'production') {
 
@@ -84,7 +91,7 @@ export class MMExpress {
     });
 
     let httpsServerPromise = new Promise((resolve, reject) => {
-      if (config.https.enable !== 'true') {
+      if (this.config.https.enable !== 'true') {
         return resolve();
       }
       this.logger.debug('Express::Listen::Https::Start');
@@ -94,7 +101,7 @@ export class MMExpress {
         reject(err);
       });
 
-      this.httpsServer.listen({ port: config.https.port, host: config.host }, () => {
+      this.httpsServer.listen({ port: this.config.https.port, host: this.config.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if(process.env.NODE_ENV !== 'production') {
           this.logger.debug('Express::Listen::Http::EnableDestroy');
