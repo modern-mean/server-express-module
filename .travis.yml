@@ -32,7 +32,7 @@ before_install:
 #  - sleep 3
 after_script:
   - nsp audit-package
-  - npm coverage
+  - npm run coverage
 notifications:
   webhooks:
     urls:
