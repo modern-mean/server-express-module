@@ -1,4 +1,4 @@
-import chai from 'chai';
+zimport chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import sinonPromised from 'sinon-as-promised';
