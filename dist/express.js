@@ -17,9 +17,7 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _logger = require('./logger');
-
-var _logger2 = _interopRequireDefault(_logger);
+var _serverLoggerModule = require('@modern-mean/server-logger-module');
 
 var _bodyParser = require('body-parser');
 
@@ -59,7 +57,11 @@ class MMExpress {
     this.httpServer = undefined;
     this.httpsServer = undefined;
 
-    _logger2.default.debug('Express::Constructor::Start', _config2.default);
+    //Initaite logger
+    let logger = new _serverLoggerModule.MMLogger(_config2.default.logs);
+    this.logger = logger.get();
+
+    this.logger.debug('Express::Constructor::Start', _config2.default);
     this.expressApp = (0, _express2.default)();
     this.httpServer = _http2.default.createServer(this.expressApp);
     if (_config2.default.https.enable === 'true') {
@@ -75,42 +77,42 @@ class MMExpress {
       this.expressApp.set('forceSSLOptions', {
         httpsPort: _config2.default.https.port
       });
-      _logger2.default.debug('Express::Middleware::ForceSSL');
+      this.logger.debug('Express::Middleware::ForceSSL');
       this.expressApp.use(_expressForceSsl2.default);
     }
 
     if (_config2.default.logs.morgan.enable === 'true') {
-      _logger2.default.debug('Express::Middleware::Morgan');
+      this.logger.debug('Express::Middleware::Morgan');
       this.expressApp.use((0, _morgan2.default)(_config2.default.logs.morgan.format, _config2.default.logs.morgan.options));
     }
 
     if (_config2.default.helmet.enable === 'true') {
-      _logger2.default.debug('Express::Middleware::Helmet');
+      this.logger.debug('Express::Middleware::Helmet');
       this.expressApp.use((0, _helmet2.default)(_config2.default.helmet.config));
     }
 
-    _logger2.default.verbose('Express::Constructor::Success');
+    this.logger.verbose('Express::Constructor::Success');
   }
 
   listen() {
-    _logger2.default.debug('Express::Listen::Start');
-    _logger2.default.info('Environment:     ' + process.env.NODE_ENV);
+    this.logger.debug('Express::Listen::Start');
+    this.logger.info('Environment:     ' + process.env.NODE_ENV);
     let httpServerPromise = new Promise((resolve, reject) => {
 
       this.httpServer.once('error', err => {
-        _logger2.default.error('Express::Listen::Http::Error', err);
+        this.logger.error('Express::Listen::Http::Error', err);
         reject(err);
       });
-      _logger2.default.debug('Express::Listen::Https::Start');
+      this.logger.debug('Express::Listen::Https::Start');
       this.httpServer.listen({ port: _config2.default.http.port, host: _config2.default.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if (process.env.NODE_ENV !== 'production') {
 
           (0, _serverDestroy2.default)(this.httpServer);
-          _logger2.default.debug('Express::Listen::Http::EnableDestroy');
+          this.logger.debug('Express::Listen::Http::EnableDestroy');
         }
-        _logger2.default.debug('Express::Listen::Http::Success');
-        _logger2.default.info('HTTP Server:     ' + this.httpServer.address().address + ':' + this.httpServer.address().port);
+        this.logger.debug('Express::Listen::Http::Success');
+        this.logger.info('HTTP Server:     ' + this.httpServer.address().address + ':' + this.httpServer.address().port);
         return resolve(this.httpServer);
       });
     });
@@ -119,21 +121,21 @@ class MMExpress {
       if (_config2.default.https.enable !== 'true') {
         return resolve();
       }
-      _logger2.default.debug('Express::Listen::Https::Start');
+      this.logger.debug('Express::Listen::Https::Start');
 
       this.httpsServer.once('error', err => {
-        _logger2.default.error('Express::Listen::Https::Error', err);
+        this.logger.error('Express::Listen::Https::Error', err);
         reject(err);
       });
 
       this.httpsServer.listen({ port: _config2.default.https.port, host: _config2.default.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if (process.env.NODE_ENV !== 'production') {
-          _logger2.default.debug('Express::Listen::Http::EnableDestroy');
+          this.logger.debug('Express::Listen::Http::EnableDestroy');
           (0, _serverDestroy2.default)(this.httpsServer);
         }
-        _logger2.default.debug('Express::Listen::Https::Success');
-        _logger2.default.info('HTTPS Server:  ' + this.httpsServer.address().address + ':' + this.httpsServer.address().port);
+        this.logger.debug('Express::Listen::Https::Success');
+        this.logger.info('HTTPS Server:  ' + this.httpsServer.address().address + ':' + this.httpsServer.address().port);
         return resolve(this.httpsServer);
       });
     });
@@ -142,42 +144,42 @@ class MMExpress {
   }
 
   destroy() {
-    _logger2.default.debug('Express::Destroy::Start');
+    this.logger.debug('Express::Destroy::Start');
     let httpServerPromise = new Promise((resolve, reject) => {
-      _logger2.default.debug('Express::Destroy::Http::Start');
+      this.logger.debug('Express::Destroy::Http::Start');
 
       if (!this.httpServer || !this.httpServer.listening) {
-        _logger2.default.debug('Express::Destroy::Http::NotListening');
+        this.logger.debug('Express::Destroy::Http::NotListening');
         this.httpServer = undefined;
         return resolve();
       }
-      _logger2.default.debug('Express::Destroy::Http::Destroying');
+      this.logger.debug('Express::Destroy::Http::Destroying');
 
       this.httpServer.destroy(() => {
         this.httpServer = undefined;
-        _logger2.default.debug('Express::Destroy::Http::Success');
+        this.logger.debug('Express::Destroy::Http::Success');
         return resolve();
       });
     });
 
     let httpsServerPromise = new Promise((resolve, reject) => {
-      _logger2.default.debug('Express::Destroy::Https::Start');
+      this.logger.debug('Express::Destroy::Https::Start');
       if (!this.httpsServer || !this.httpsServer.listening) {
-        _logger2.default.debug('Express::Destroy::Https::NotListening');
+        this.logger.debug('Express::Destroy::Https::NotListening');
         this.httpsServer = undefined;
         return resolve();
       }
-      _logger2.default.debug('Express::Destroy::Https::Start');
+      this.logger.debug('Express::Destroy::Https::Start');
       this.httpsServer.destroy(() => {
         this.httpsServer = undefined;
-        _logger2.default.debug('Express::Destroy::Https::Success');
+        this.logger.debug('Express::Destroy::Https::Success');
         return resolve();
       });
     });
 
     return Promise.all([httpServerPromise, httpsServerPromise]).then(() => {
       this.expressApp = undefined;
-      _logger2.default.verbose('Express::Destroy::Success');
+      this.logger.verbose('Express::Destroy::Success');
     });
   }
 
