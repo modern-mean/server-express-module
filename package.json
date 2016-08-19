@@ -4,6 +4,7 @@
   "description": "Modern-Mean module for express",
   "main": "index.js",
   "scripts": {
+    "coverage": "gulp test:coverage",
     "test": "gulp test",
     "build": "gulp",
     "preversion": "npm test",
