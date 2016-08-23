@@ -1,6 +1,6 @@
 {
   "name": "@modern-mean/server-express-module",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Modern-Mean module for express",
   "main": "index.js",
   "scripts": {
