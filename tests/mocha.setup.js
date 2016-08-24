@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import sinonPromised from 'sinon-as-promised';
 import promised from 'chai-as-promised';
 import request from 'supertest';
-import config from '../src/config';
+import { config } from '../index';
 
 chai.use(promised);
 chai.use(sinonChai);

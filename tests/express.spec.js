@@ -1,6 +1,6 @@
 'use strict';
 
-import { MMExpress } from '../src/express';
+import { MMExpress } from '../index.js';
 import express from 'express';
 import http from 'http';
 import https from 'https';
