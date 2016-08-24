@@ -1,82 +1,45 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.MMExpress = undefined;
+import http from 'http';
+import https from 'https';
+import express from 'express';
+import bodyParser from 'body-parser';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import fs from 'fs';
+import forceSSL from 'express-force-ssl';
+import enableDestroy from 'server-destroy';
 
-var _http = require('http');
+import config from './config';
+import logger from './logger';
+import { MMBase } from '@modern-mean/server-base-module';
 
-var _http2 = _interopRequireDefault(_http);
 
-var _https = require('https');
 
-var _https2 = _interopRequireDefault(_https);
+export class MMExpress extends MMBase {
 
-var _express = require('express');
+  constructor(...args) {
+    //Push default configuration to front of array.  Passed in configuration from ...args should take precedence.
+    args.unshift({ MMConfig: config, MMLogger: logger });
+    super(...args);
 
-var _express2 = _interopRequireDefault(_express);
+    this.config = this.getConfigModule().get();
+    this.logger = this.getLoggerModule().get();
 
-var _bodyParser = require('body-parser');
-
-var _bodyParser2 = _interopRequireDefault(_bodyParser);
-
-var _helmet = require('helmet');
-
-var _helmet2 = _interopRequireDefault(_helmet);
-
-var _morgan = require('morgan');
-
-var _morgan2 = _interopRequireDefault(_morgan);
-
-var _fs = require('fs');
-
-var _fs2 = _interopRequireDefault(_fs);
-
-var _expressForceSsl = require('express-force-ssl');
-
-var _expressForceSsl2 = _interopRequireDefault(_expressForceSsl);
-
-var _serverDestroy = require('server-destroy');
-
-var _serverDestroy2 = _interopRequireDefault(_serverDestroy);
-
-var _config = require('./config');
-
-var _config2 = _interopRequireDefault(_config);
-
-var _serverLoggerModule = require('@modern-mean/server-logger-module');
-
-var _serverConfigModule = require('@modern-mean/server-config-module');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-class MMExpress {
-
-  constructor(configMerge) {
     //Properties
     this.expressApp = undefined;
     this.httpServer = undefined;
     this.httpsServer = undefined;
 
-    //Initiate config
-    let configModule = new _serverConfigModule.MMConfig(_config2.default);
-    configModule.merge(configMerge);
-    this.config = configModule.get();
-
-    //Initaite logger
-    let loggerModule = new _serverLoggerModule.MMLogger(this.config.logs);
-    this.logger = loggerModule.get();
-
     this.logger.debug('Express::Constructor::Start');
-    this.expressApp = (0, _express2.default)();
-    this.httpServer = _http2.default.createServer(this.expressApp);
+    this.expressApp = express();
+    this.httpServer = http.createServer(this.expressApp);
     if (this.config.https.enable === 'true') {
       let httpsOptions = {
-        key: _fs2.default.readFileSync(this.config.https.options.key),
-        cert: _fs2.default.readFileSync(this.config.https.options.cert)
+        key: fs.readFileSync(this.config.https.options.key),
+        cert: fs.readFileSync(this.config.https.options.cert)
       };
-      this.httpsServer = _https2.default.createServer(httpsOptions, this.expressApp);
+      this.httpsServer = https.createServer(httpsOptions, this.expressApp);
     }
 
     //Middleware
@@ -85,20 +48,21 @@ class MMExpress {
         httpsPort: this.config.https.port
       });
       this.logger.debug('Express::Middleware::ForceSSL');
-      this.expressApp.use(_expressForceSsl2.default);
+      this.expressApp.use(forceSSL);
     }
 
     if (this.config.logs.morgan.enable === 'true') {
       this.logger.debug('Express::Middleware::Morgan');
-      this.expressApp.use((0, _morgan2.default)(this.config.logs.morgan.format, this.config.logs.morgan.options));
+      this.expressApp.use(morgan(this.config.logs.morgan.format, this.config.logs.morgan.options));
     }
 
     if (this.config.helmet.enable === 'true') {
       this.logger.debug('Express::Middleware::Helmet');
-      this.expressApp.use((0, _helmet2.default)(this.config.helmet.config));
+      this.expressApp.use(helmet(this.config.helmet.config));
     }
 
     this.logger.verbose('Express::Constructor::Success');
+
   }
 
   listen() {
@@ -113,15 +77,16 @@ class MMExpress {
       this.logger.debug('Express::Listen::Https::Start');
       this.httpServer.listen({ port: this.config.http.port, host: this.config.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
-        if (process.env.NODE_ENV !== 'production') {
+        if(process.env.NODE_ENV !== 'production') {
 
-          (0, _serverDestroy2.default)(this.httpServer);
+          enableDestroy(this.httpServer);
           this.logger.debug('Express::Listen::Http::EnableDestroy');
         }
         this.logger.debug('Express::Listen::Http::Success');
         this.logger.info('HTTP Server:     ' + this.httpServer.address().address + ':' + this.httpServer.address().port);
         return resolve(this.httpServer);
       });
+
     });
 
     let httpsServerPromise = new Promise((resolve, reject) => {
@@ -137,14 +102,15 @@ class MMExpress {
 
       this.httpsServer.listen({ port: this.config.https.port, host: this.config.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
-        if (process.env.NODE_ENV !== 'production') {
+        if(process.env.NODE_ENV !== 'production') {
           this.logger.debug('Express::Listen::Http::EnableDestroy');
-          (0, _serverDestroy2.default)(this.httpsServer);
+          enableDestroy(this.httpsServer);
         }
         this.logger.debug('Express::Listen::Https::Success');
         this.logger.info('HTTPS Server:  ' + this.httpsServer.address().address + ':' + this.httpsServer.address().port);
         return resolve(this.httpsServer);
       });
+
     });
 
     return Promise.all([httpServerPromise, httpsServerPromise]);
@@ -167,6 +133,8 @@ class MMExpress {
         this.logger.debug('Express::Destroy::Http::Success');
         return resolve();
       });
+
+
     });
 
     let httpsServerPromise = new Promise((resolve, reject) => {
@@ -184,10 +152,11 @@ class MMExpress {
       });
     });
 
-    return Promise.all([httpServerPromise, httpsServerPromise]).then(() => {
-      this.expressApp = undefined;
-      this.logger.verbose('Express::Destroy::Success');
-    });
+    return Promise.all([httpServerPromise, httpsServerPromise])
+            .then(() => {
+              this.expressApp = undefined;
+              this.logger.verbose('Express::Destroy::Success');
+            });
   }
 
   getHttpServer() {
@@ -203,4 +172,3 @@ class MMExpress {
   }
 
 }
-exports.MMExpress = MMExpress;
