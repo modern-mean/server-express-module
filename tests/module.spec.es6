@@ -1,5 +1,3 @@
-'use strict';
-
 import { MMExpress } from '../src/module.es6';
 import express from 'express';
 import http from 'http';

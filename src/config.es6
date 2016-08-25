@@ -1,5 +1,3 @@
-'use strict';
-
 export default {
   host: process.env.MM_EXPRESS_HOST || '0.0.0.0',
   http: {
