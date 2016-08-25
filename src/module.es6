@@ -9,7 +9,6 @@ import morgan from 'morgan';
 import fs from 'fs';
 import forceSSL from 'express-force-ssl';
 import enableDestroy from 'server-destroy';
-
 import config from './config';
 import logger from './logger';
 import { MMBase } from '@modern-mean/server-base-module';
