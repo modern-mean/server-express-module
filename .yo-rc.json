@@ -1,0 +1,20 @@
+{
+  "generator-github-create": {
+    "readme": {
+      "title": "server-express-module",
+      "description": "Modern Mean module for express server",
+      "usebadges": true,
+      "badges": [
+        "travis",
+        "coveralls",
+        "david",
+        "davidDev",
+        "gitter",
+        "npm"
+      ],
+      "profile": "modern-mean",
+      "repository": "server-express-module",
+      "scoped": true
+    }
+  }
+}
