@@ -11,13 +11,13 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "rm -rf ./dist && babel --out-dir ./dist --copy-files ./src",
     "build:watch": "rm -rf ./dist && babel --out-dir ./dist --copy-files --watch ./src",
-    "lint": "eslint ./tests/** ./src/**",
+    "lint": "eslint ./test/**/*.js ./src/**/*.js",
     "postversion": "git push && git push --tags && npm publish --access public",
     "release:patch": "npm test && npm run build && npm version patch",
     "release:minor": "npm test && npm run build && npm version minor",
     "release:major": "npm test && npm run build && npm version major",
-    "test": "npm run lint && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha --compilers js:babel-core/register --require tests/mocha.setup.js tests/*.spec.js",
-    "test:watch": "npm run lint && cross-env NODE_ENV=test nyc --reporter=text mocha --watch --compilers js:babel-core/register --require tests/mocha.setup.js tests/**/*.spec.js"
+    "test": "npm run lint && cross-env NODE_ENV=test nyc mocha test/*.spec.js",
+    "test:watch": "npm run lint && cross-env NODE_ENV=test nyc mocha --watch test/**/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -58,6 +58,18 @@
   },
   "nyc": {
     "sourceMap": false,
-    "instrument": false
+    "instrument": false,
+    "reporter": [
+      "lcov",
+      "text",
+      "text-summary"
+    ],
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "tests/**/*"
+    ],
+    "all": true
   }
 }
