@@ -8,3 +8,4 @@ src/
 test/
 coverage/
 .nyc_output
+npm-debug.log
