@@ -1,4 +1,4 @@
-import { MMExpress } from '../src/module.es6';
+import { ExpressModule } from '../src/module';
 import express from 'express';
 import http from 'http';
 import https from 'https';
@@ -10,7 +10,7 @@ describe('/src/express.js', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    return expressTest = new MMExpress();
+    return expressTest = new ExpressModule();
   });
 
   afterEach(() => {
@@ -68,10 +68,19 @@ describe('/src/express.js', () => {
         return httpsStub.should.have.been.called;
       });
 
+      it('should not call httpsServer.listen if https is not enabled', () => {
+        expressTest.destroy();
+        expressTest = new ExpressModule({ config: { https: { enable: true } } });
+        expressTest.listen()
+          .then(() => {
+            return httpsStub.should.not.have.been.called;
+          });
+      });
+
     });
 
     describe('error', () => {
-      let firstExpress = new MMExpress();
+      let firstExpress = new ExpressModule();
 
       beforeEach(() => {
         return firstExpress.listen();
@@ -95,8 +104,7 @@ describe('/src/express.js', () => {
 
       beforeEach(() => {
         return expressTest.listen()
-          .then(() => expressTest.destroy())
-          .catch(err => { console.log(err); });
+          .then(() => expressTest.destroy());
       });
 
       it('should destroy httpServer', () => {

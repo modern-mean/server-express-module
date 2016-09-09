@@ -2,19 +2,22 @@
   "name": "@modern-mean/server-express-module",
   "version": "0.0.16",
   "description": "Modern-Mean module for express",
-  "main": "index.js",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=6.4",
     "npm": ">=3.10.3"
   },
   "scripts": {
-    "coverage": "gulp test:coverage",
-    "test": "gulp test",
-    "build": "gulp build",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "build": "rm -rf ./dist && babel --out-dir ./dist --copy-files ./src",
+    "build:watch": "rm -rf ./dist && babel --out-dir ./dist --copy-files --watch ./src",
+    "lint": "eslint ./tests/** ./src/**",
     "postversion": "git push && git push --tags && npm publish --access public",
     "release:patch": "npm test && npm run build && npm version patch",
     "release:minor": "npm test && npm run build && npm version minor",
-    "release:major": "npm test && npm run build && npm version major"
+    "release:major": "npm test && npm run build && npm version major",
+    "test": "npm run lint && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha --compilers js:babel-core/register --require tests/mocha.setup.js tests/*.spec.js",
+    "test:watch": "npm run lint && cross-env NODE_ENV=test nyc --reporter=text mocha --watch --compilers js:babel-core/register --require tests/mocha.setup.js tests/**/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -27,7 +30,7 @@
   },
   "homepage": "https://github.com/modern-mean/server-express-module#readme",
   "dependencies": {
-    "@modern-mean/server-base-module": "~0.0.2",
+    "@modern-mean/server-base-module": "~0.1.0",
     "body-parser": "^1.15.2",
     "compression": "^1.6.2",
     "express": "^4.14.0",
@@ -37,6 +40,23 @@
     "server-destroy": "^1.0.1"
   },
   "devDependencies": {
-    "@modern-mean/build-gulp": "~0.0.5"
+    "babel-cli": "^6.14.0",
+    "babel-core": "^6.14.0",
+    "babel-plugin-istanbul": "^2.0.1",
+    "babel-preset-es2015-node6": "^0.3.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "coveralls": "^2.11.12",
+    "cross-env": "^2.0.1",
+    "eslint": "^3.4.0",
+    "mocha": "^3.0.2",
+    "nyc": "^8.1.0",
+    "sinon": "^1.17.5",
+    "sinon-as-promised": "^4.0.2",
+    "sinon-chai": "^2.8.0"
+  },
+  "nyc": {
+    "sourceMap": false,
+    "instrument": false
   }
 }

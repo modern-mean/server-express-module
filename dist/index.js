@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _module = require('./dist/module');
+var _module = require('./module');
 
 Object.keys(_module).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
@@ -16,7 +16,7 @@ Object.keys(_module).forEach(function (key) {
   });
 });
 
-var _config = require('./dist/config');
+var _config = require('./config');
 
 Object.keys(_config).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;

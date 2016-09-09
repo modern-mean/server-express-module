@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.MMExpress = undefined;
+exports.ExpressModule = undefined;
 
 var _http = require('http');
 
@@ -53,11 +53,11 @@ var _serverBaseModule = require('@modern-mean/server-base-module');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-class MMExpress extends _serverBaseModule.MMBase {
+class ExpressModule extends _serverBaseModule.BaseModule {
 
   constructor(...args) {
     //Push default configuration to front of array.  Passed in configuration from ...args should take precedence.
-    args.unshift({ MMConfig: _config2.default, MMLogger: _logger2.default });
+    args.unshift({ config: _config2.default, logger: _logger2.default });
     super(...args);
 
     this.config = this.getConfigModule().get();
@@ -203,4 +203,4 @@ class MMExpress extends _serverBaseModule.MMBase {
   }
 
 }
-exports.MMExpress = MMExpress;
+exports.ExpressModule = ExpressModule;
