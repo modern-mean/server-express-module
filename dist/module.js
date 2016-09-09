@@ -64,6 +64,7 @@ class ExpressModule extends _serverBaseModule.BaseModule {
     this.logger = this.getLoggerModule().get();
 
     //Properties
+    this.express = _express2.default;
     this.expressApp = undefined;
     this.httpServer = undefined;
     this.httpsServer = undefined;

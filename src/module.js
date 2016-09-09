@@ -24,6 +24,7 @@ export class ExpressModule extends BaseModule {
     this.logger = this.getLoggerModule().get();
 
     //Properties
+    this.express = express;
     this.expressApp = undefined;
     this.httpServer = undefined;
     this.httpsServer = undefined;
