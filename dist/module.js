@@ -57,7 +57,7 @@ class ExpressModule extends _serverBaseModule.BaseModule {
 
   constructor(...args) {
     //Push default configuration to front of array.  Passed in configuration from ...args should take precedence.
-    args.unshift({ config: _config2.default, logger: _logger2.default });
+    args.unshift({ config: _config2.default, logger: (0, _logger2.default)() });
     super(...args);
 
     this.config = this.getConfigModule().get();
