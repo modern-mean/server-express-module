@@ -60,11 +60,6 @@
   "nyc": {
     "sourceMap": false,
     "instrument": false,
-    "reporter": [
-      "lcov",
-      "text",
-      "text-summary"
-    ],
     "include": [
       "src/**/*.js"
     ],
