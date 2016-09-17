@@ -45,10 +45,6 @@ var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
 
-var _logger = require('./logger');
-
-var _logger2 = _interopRequireDefault(_logger);
-
 var _serverBaseModule = require('@modern-mean/server-base-module');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -56,12 +52,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 class ExpressModule extends _serverBaseModule.BaseModule {
 
   constructor(...args) {
-    //Push default configuration to front of array.  Passed in configuration from ...args should take precedence.
-    args.unshift({ config: (0, _config2.default)(), logger: (0, _logger2.default)() });
-    super(...args);
 
-    this.config = this.getConfigModule().get();
-    this.logger = this.getLoggerModule().get();
+    super(...args, (0, _config2.default)());
 
     //Properties
     this.express = _express2.default;
@@ -72,31 +64,31 @@ class ExpressModule extends _serverBaseModule.BaseModule {
     this.logger.debug('Express::Constructor::Start');
     this.expressApp = (0, _express2.default)();
     this.httpServer = _http2.default.createServer(this.expressApp);
-    if (this.config.https.enable === 'true') {
+    if (this.config.ExpressModule.https.enable === 'true') {
       let httpsOptions = {
-        key: _fs2.default.readFileSync(this.config.https.options.key),
-        cert: _fs2.default.readFileSync(this.config.https.options.cert)
+        key: _fs2.default.readFileSync(this.config.ExpressModule.https.options.key),
+        cert: _fs2.default.readFileSync(this.config.ExpressModule.https.options.cert)
       };
       this.httpsServer = _https2.default.createServer(httpsOptions, this.expressApp);
     }
 
     //Middleware
-    if (this.config.https.enable === 'true') {
+    if (this.config.ExpressModule.https.enable === 'true') {
       this.expressApp.set('forceSSLOptions', {
-        httpsPort: this.config.https.port
+        httpsPort: this.config.ExpressModule.https.port
       });
       this.logger.debug('Express::Middleware::ForceSSL');
       this.expressApp.use(_expressForceSsl2.default);
     }
 
-    if (this.config.logs.morgan.enable === 'true') {
+    if (this.config.ExpressModule.logs.morgan.enable === 'true') {
       this.logger.debug('Express::Middleware::Morgan');
-      this.expressApp.use((0, _morgan2.default)(this.config.logs.morgan.format, this.config.logs.morgan.options));
+      this.expressApp.use((0, _morgan2.default)(this.config.ExpressModule.logs.morgan.format, this.config.ExpressModule.logs.morgan.options));
     }
 
-    if (this.config.helmet.enable === 'true') {
+    if (this.config.ExpressModule.helmet.enable === 'true') {
       this.logger.debug('Express::Middleware::Helmet');
-      this.expressApp.use((0, _helmet2.default)(this.config.helmet.config));
+      this.expressApp.use((0, _helmet2.default)(this.config.ExpressModule.helmet.config));
     }
 
     this.logger.verbose('Express::Constructor::Success');
@@ -112,7 +104,7 @@ class ExpressModule extends _serverBaseModule.BaseModule {
         reject(err);
       });
       this.logger.debug('Express::Listen::Https::Start');
-      this.httpServer.listen({ port: this.config.http.port, host: this.config.host }, () => {
+      this.httpServer.listen({ port: this.config.ExpressModule.http.port, host: this.config.ExpressModule.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if (process.env.NODE_ENV !== 'production') {
 
@@ -126,7 +118,7 @@ class ExpressModule extends _serverBaseModule.BaseModule {
     });
 
     let httpsServerPromise = new Promise((resolve, reject) => {
-      if (this.config.https.enable !== 'true') {
+      if (this.config.ExpressModule.https.enable !== 'true') {
         return resolve();
       }
       this.logger.debug('Express::Listen::Https::Start');
@@ -136,7 +128,7 @@ class ExpressModule extends _serverBaseModule.BaseModule {
         reject(err);
       });
 
-      this.httpsServer.listen({ port: this.config.https.port, host: this.config.host }, () => {
+      this.httpsServer.listen({ port: this.config.ExpressModule.https.port, host: this.config.ExpressModule.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if (process.env.NODE_ENV !== 'production') {
           this.logger.debug('Express::Listen::Http::EnableDestroy');
