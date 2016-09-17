@@ -70,7 +70,7 @@ describe('/src/express.js', () => {
 
       it('should not call httpsServer.listen if https is not enabled', () => {
         expressTest.destroy();
-        expressTest = new ExpressModule({ config: { https: { enable: true } } });
+        expressTest = new ExpressModule({ ExpressModule: { https: { enable: true } } });
         expressTest.listen()
           .then(() => {
             return httpsStub.should.not.have.been.called;

@@ -8,55 +8,48 @@ import fs from 'fs';
 import forceSSL from 'express-force-ssl';
 import enableDestroy from 'server-destroy';
 import config from './config';
-import logger from './logger';
 import { BaseModule } from '@modern-mean/server-base-module';
-
-
 
 export class ExpressModule extends BaseModule {
 
   constructor(...args) {
-    //Push default configuration to front of array.  Passed in configuration from ...args should take precedence.
-    args.unshift({ config: config(), logger: logger() });
-    super(...args);
 
-    this.config = this.getConfigModule().get();
-    this.logger = this.getLoggerModule().get();
+    super(...args, config());
 
     //Properties
     this.express = express;
     this.expressApp = undefined;
     this.httpServer = undefined;
     this.httpsServer = undefined;
-
+    
     this.logger.debug('Express::Constructor::Start');
     this.expressApp = express();
     this.httpServer = http.createServer(this.expressApp);
-    if (this.config.https.enable === 'true') {
+    if (this.config.ExpressModule.https.enable === 'true') {
       let httpsOptions = {
-        key: fs.readFileSync(this.config.https.options.key),
-        cert: fs.readFileSync(this.config.https.options.cert)
+        key: fs.readFileSync(this.config.ExpressModule.https.options.key),
+        cert: fs.readFileSync(this.config.ExpressModule.https.options.cert)
       };
       this.httpsServer = https.createServer(httpsOptions, this.expressApp);
     }
 
     //Middleware
-    if (this.config.https.enable === 'true') {
+    if (this.config.ExpressModule.https.enable === 'true') {
       this.expressApp.set('forceSSLOptions', {
-        httpsPort: this.config.https.port
+        httpsPort: this.config.ExpressModule.https.port
       });
       this.logger.debug('Express::Middleware::ForceSSL');
       this.expressApp.use(forceSSL);
     }
 
-    if (this.config.logs.morgan.enable === 'true') {
+    if (this.config.ExpressModule.logs.morgan.enable === 'true') {
       this.logger.debug('Express::Middleware::Morgan');
-      this.expressApp.use(morgan(this.config.logs.morgan.format, this.config.logs.morgan.options));
+      this.expressApp.use(morgan(this.config.ExpressModule.logs.morgan.format, this.config.ExpressModule.logs.morgan.options));
     }
 
-    if (this.config.helmet.enable === 'true') {
+    if (this.config.ExpressModule.helmet.enable === 'true') {
       this.logger.debug('Express::Middleware::Helmet');
-      this.expressApp.use(helmet(this.config.helmet.config));
+      this.expressApp.use(helmet(this.config.ExpressModule.helmet.config));
     }
 
     this.logger.verbose('Express::Constructor::Success');
@@ -73,7 +66,7 @@ export class ExpressModule extends BaseModule {
         reject(err);
       });
       this.logger.debug('Express::Listen::Https::Start');
-      this.httpServer.listen({ port: this.config.http.port, host: this.config.host }, () => {
+      this.httpServer.listen({ port: this.config.ExpressModule.http.port, host: this.config.ExpressModule.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if(process.env.NODE_ENV !== 'production') {
 
@@ -88,7 +81,7 @@ export class ExpressModule extends BaseModule {
     });
 
     let httpsServerPromise = new Promise((resolve, reject) => {
-      if (this.config.https.enable !== 'true') {
+      if (this.config.ExpressModule.https.enable !== 'true') {
         return resolve();
       }
       this.logger.debug('Express::Listen::Https::Start');
@@ -98,7 +91,7 @@ export class ExpressModule extends BaseModule {
         reject(err);
       });
 
-      this.httpsServer.listen({ port: this.config.https.port, host: this.config.host }, () => {
+      this.httpsServer.listen({ port: this.config.ExpressModule.https.port, host: this.config.ExpressModule.host }, () => {
         /* istanbul ignore else: cant test this since production server cant be destroyed  */
         if(process.env.NODE_ENV !== 'production') {
           this.logger.debug('Express::Listen::Http::EnableDestroy');
