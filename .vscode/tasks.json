@@ -1,0 +1,27 @@
+{
+  "name": "npmTask",
+  "suppressTaskName": true,
+  "command": "npm",
+  "isShellCommand": true,
+  "args": [
+    "run"
+  ],
+  "tasks": [
+    {
+      "taskName": "test",
+      "isBuildCommand": false,
+      "isTestCommand": true,
+      "args": [
+        "test"
+      ]
+    },
+    {
+      "taskName": "build",
+      "isBuildCommand": true,
+      "isTestCommand": false,
+      "args": [
+        "build"
+      ]
+    }
+  ]
+}

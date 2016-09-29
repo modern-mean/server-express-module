@@ -1,8 +1,7 @@
 # Node and related ecosystem
 node_modules/
-bower_components/
 npm-debug.log
 
 # Modern-MEAN app and assets
-.nyc_output/
 coverage/
+dist/
