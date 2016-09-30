@@ -124,7 +124,7 @@ test('module.ts destroy', (assert) => {
 
 test('module.ts ExpressDefaultConfig', (assert) => {
   let config = ExpressDefaultConfig();
-  assert.equal(config.module, 'ExpressModule', 'should return default config')
+  assert.equal(config.module, 'ExpressModule', 'should return default config');
   assert.end();
 });
 

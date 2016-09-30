@@ -19,7 +19,10 @@
     "object-curly-spacing": [2, "always"],
     "quotes": [1, "single"],
     "space-in-parens": [2, "never"],
-    "semi": [2, "always"]
+    "semi": [2, "always"],
+    //TODO: Remove these two when eslint typscript supports it
+    "no-undef": 0,
+    "no-unused-vars": 0
   },
   "env": {
     "node": true,
