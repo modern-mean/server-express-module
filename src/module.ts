@@ -21,7 +21,7 @@ export class ExpressModule extends BaseModule {
 
   constructor(...args) {
 
-    super(...args);
+    super(ExpressLoggerConfig(), ...args);
 
     //Set Config
     this.config = this.configModule.defaults(ExpressDefaultConfig());
@@ -47,6 +47,22 @@ export class ExpressModule extends BaseModule {
 
     this.logger.debug('Express::Constructor::Success');
 
+  }
+
+  addMiddleware(middleware: Middleware): Promise<Middleware[]> {
+    return new Promise((resolve) => {
+      let current = this.getMiddleware(middleware.name);
+      if (current.length === 1) {
+        this.middleware[this.middleware.indexOf(current[0])] = middleware;
+      } else if (current.length > 1) {
+        /* istanbul ignore next */
+        this.logger.error('Express::addMiddleware::Duplicate Middleware on stack!');
+      }
+      else {
+        this.middleware.push(middleware);
+      }
+      return resolve(this.middleware);
+    });
   }
 
   enableMiddleware(): Promise<void> {
@@ -79,7 +95,7 @@ export class ExpressModule extends BaseModule {
     this.logger.debug('Express::Listen::Start');
     this.logger.info('Environment:     ' + process.env.NODE_ENV);
     let httpServerPromise: Promise<http.Server> = new Promise((resolve, reject) => {
-
+      /* istanbul ignore next */
       this.httpServer.once('error', err => {
         this.logger.error('Express::Listen::Http::Error', err);
         return reject(err);
@@ -98,7 +114,7 @@ export class ExpressModule extends BaseModule {
         return resolve();
       }
       this.logger.debug('Express::Listen::Https::Start');
-
+      /* istanbul ignore next */
       this.httpsServer.once('error', err => {
         this.logger.error('Express::Listen::Https::Error', err);
         return reject(err);
@@ -125,7 +141,7 @@ export class ExpressModule extends BaseModule {
         return resolve();
       }
       this.logger.debug('Express::Destroy::Http::Destroying');
-
+      /* istanbul ignore next */
       this.httpServer.on('close', () => {
         return resolve();
       });
@@ -141,7 +157,7 @@ export class ExpressModule extends BaseModule {
           return resolve();
         }
         this.logger.debug('Express::Destroy::Https::Start');
-        
+        /* istanbul ignore next */
         this.httpsServer.on('close', () => {
           return resolve();
         });
@@ -172,21 +188,6 @@ export class ExpressModule extends BaseModule {
       return this.middleware.filter(item => item.name === filter);
     }
     return this.middleware;
-  }
-
-  addMiddleware(middleware: Middleware): Promise<Middleware[]> {
-    return new Promise((resolve) => {
-      let current = this.getMiddleware(middleware.name);
-      if (current.length === 1) {
-        this.middleware[this.middleware.indexOf(current[0])] = middleware;
-      } else if (current.length > 1) {
-        this.logger.error('Express::addMiddleware::Duplicate Middleware on stack!');
-      }
-      else {
-        this.middleware.push(middleware);
-      }
-      return resolve(this.middleware);
-    });
   }
 
 }
@@ -225,11 +226,8 @@ export function ExpressDefaultConfig(): ModuleConfig {
       }
     }
   };
-  let config: ModuleConfig = {
-    module: 'ExpressModule',
-    type: 'config',
-    options: options
-  };
+  let config: ModuleConfig = createConfig('ExpressModule');
+  config.options = options;
   return config;
 }
 
@@ -237,9 +235,9 @@ export function ExpressLoggerConfig(): ModuleConfig {
   let options: LoggerOptions = {
     level:  process.env.EXPRESSMODULE_LOG_LEVEL,
     file: process.env.EXPRESSMODULE_LOG_FILE,
-    console: process.env.EXPRESSMODULE_LOG_CONSOLE
+    console: process.env.EXPRESSMODULE_LOG_CONSOLE ? false : true
   };
-  let config: ModuleConfig = createConfig('ExpressModule');
+  let config: ModuleConfig = createConfig('LoggerModule');
   config.options = options;
 
   return config;
