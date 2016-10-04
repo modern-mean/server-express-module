@@ -72,7 +72,7 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
   }
 
   enable(): Middleware {
-    this.middleware.enable(this.rootRouter);
+    this.middleware.enable(this.versionRouter);
     this.rootRouter.use(this.config.options.route.version, this.versionRouter);
     return this.middleware.create('apirouter', 101, this.rootRouter, this.config.options.route.root);
   }
