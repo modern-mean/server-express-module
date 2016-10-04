@@ -74,7 +74,7 @@ export class ServerModule extends BaseModule implements ServerModuleInterface {
           this.logger.error('Server::Listen::Http::Error', err);
           return reject(err);
         });
-        this.logger.debug('Server::Listen::Https::Start');
+        this.logger.debug('Server::Listen::Http::Start');
         this.httpServer.listen({ port: this.config.options.http.port, host: this.config.options.host }, () => {
           this.logger.debug('Server::Listen::Http::Success');
           this.logger.info('HTTP Server:     ' + this.httpServer.address().address + ':' + this.httpServer.address().port);

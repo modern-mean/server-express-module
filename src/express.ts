@@ -40,9 +40,6 @@ export class ExpressModule extends BaseModule implements ExpressModuleInterface 
     //Modules
     this.api = new ApiModule();
 
-    //Enable api router
-    this.middleware.add([this.api.enable()]);
-
     this.logger.debug('Express::Constructor::Success');
 
   }

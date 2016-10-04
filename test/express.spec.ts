@@ -11,7 +11,7 @@ let moduleTest = new ExpressModule();
 
 test('express.ts constructor default config', (assert) => {
   assert.pass('should run without failure');
-  assert.equal(moduleTest.middleware.get().length, 4, 'should initialize default middleware');
+  assert.equal(moduleTest.middleware.get().length, 3, 'should initialize default middleware');
   assert.notEqual(moduleTest.middleware.get('apirouter'), undefined, 'should initialize apirouter middleware');
   assert.end();
 });

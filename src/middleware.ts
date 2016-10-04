@@ -59,7 +59,7 @@ export class MiddlewareManager extends BaseModule implements MiddlewareManagerIn
             return 0;
           })
           .forEach(item => {
-            this.logger.debug('Express::enableMiddleware::' + item.name);
+            this.logger.debug('Middleware::enable::' + item.name);
             target.use(item.middleware);
             item.enabled = true;
           });
