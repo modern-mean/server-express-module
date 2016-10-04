@@ -53,7 +53,7 @@ export class ExpressModule extends BaseModule implements ExpressModuleInterface 
 
   enable(): void {
     //Enable API Module
-    this.middleware.add(this.api.enable()[0]);
+    this.middleware.add([this.api.enable()]);
     this.middleware.enable(this.app);
   }
 
