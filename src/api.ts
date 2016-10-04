@@ -45,10 +45,10 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
     });
 
     this.router
-      .route(this.config.options.route)
-      .get((req: ApiRequest, res) => {
-        res.json(this.config.options.welcome + ' Version: ' + req.apiversion);
-      });
+      .route('/')
+        .get((req: ApiRequest, res) => {
+          res.json(this.config.options.welcome + ' Version: ' + req.apiversion);
+        });
 
     //Set Middleware
     this.middleware = new MiddlewareManager();
@@ -62,7 +62,7 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
 
   enable(): Middleware {
     this.middleware.enable(this.router);
-    return this.middleware.create('apirouter', 101, this.router);
+    return this.middleware.create('apirouter', 101, this.router, this.config.options.route);
   }
 
 }

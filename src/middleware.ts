@@ -12,7 +12,8 @@ export interface Middleware {
   name: string,
   priority: number,
   middleware: express.RequestHandler,
-  enabled?: boolean
+  enabled?: boolean,
+  route?: string
 }
 
 export class MiddlewareManager extends BaseModule implements MiddlewareManagerInterface {
@@ -59,8 +60,13 @@ export class MiddlewareManager extends BaseModule implements MiddlewareManagerIn
             return 0;
           })
           .forEach(item => {
-            this.logger.debug('Middleware::enable::' + item.name);
-            target.use(item.middleware);
+            if (item.route) {
+              this.logger.debug('Middleware::enable::' + item.name + '::' + item.route);
+              target.use(item.route, item.middleware);
+            } else {
+              this.logger.debug('Middleware::enable::' + item.name);
+              target.use(item.middleware);
+            }
             item.enabled = true;
           });
         return resolve();
@@ -77,13 +83,14 @@ export class MiddlewareManager extends BaseModule implements MiddlewareManagerIn
     return this.middleware;
   }
 
-  create(name: string, priority: number, middleware): Middleware {
+  create(name: string, priority: number, middleware, route: string = undefined): Middleware {
     return {
       enable: true,
       name: name,
       priority: priority,
       enabled: false,
-      middleware: middleware
+      middleware: middleware,
+      route: route
     };
   }
 
