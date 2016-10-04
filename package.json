@@ -1,6 +1,6 @@
 {
   "name": "@modern-mean/server-express-module",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Modern-Mean module for express",
   "keywords": [
     "express",
