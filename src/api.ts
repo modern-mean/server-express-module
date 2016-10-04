@@ -85,7 +85,7 @@ function DefaultMiddleware() : Middleware[] {
 export function ApiDefaultConfig(): ModuleConfig {
   let options = {
     welcome: process.env.APIMODULE_WELCOME || 'Welcome to the Modern-Mean API Module',
-    route: (process.env.APIMODULE_ROUTE || '/api') + ':version'
+    route: (process.env.APIMODULE_ROUTE || '/api') + '/:version'
   };
   let config: ModuleConfig = createConfig('ApiModule');
   config.options = options;
