@@ -12,7 +12,10 @@ export interface ApiRequest extends express.Request {
 
 export interface ApiOptions {
   welcome: string,
-  route: string,
+  route: {
+    root: string,
+    version: string
+  },
   cors: {
     enable: boolean,
     options: cors.CorsOptions
@@ -27,7 +30,8 @@ export interface ApiModuleInterface {
 export class ApiModule extends BaseModule implements ApiModuleInterface {
 
   middleware: MiddlewareManager;
-  protected router: express.Router;
+  protected rootRouter: express.Router;
+  protected versionRouter: express.Router;
   protected config: ModuleConfig;
 
   constructor(...args) {
@@ -37,14 +41,21 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
     //Set Config
     this.config = this.configModule.defaults(ApiDefaultConfig());
 
-    this.router = express.Router();
+    this.rootRouter = express.Router();
+    this.versionRouter = express.Router();
 
-    this.router.param('version', (req: ApiRequest, res, next, id) => {
+    this.rootRouter.param('version', (req: ApiRequest, res, next, id) => {
       req.apiversion = id;
       return next();
     });
 
-    this.router
+    this.rootRouter
+      .route('/')
+        .get((req, res) => {
+          res.json(this.config.options.welcome);
+        });
+
+    this.versionRouter
       .route('/')
         .get((req: ApiRequest, res) => {
           res.json(this.config.options.welcome + ' Version: ' + req.apiversion);
@@ -57,12 +68,13 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
   }
 
   getRouter(): express.Router {
-    return this.router;
+    return this.versionRouter;
   }
 
   enable(): Middleware {
-    this.middleware.enable(this.router);
-    return this.middleware.create('apirouter', 101, this.router, this.config.options.route);
+    this.middleware.enable(this.rootRouter);
+    this.rootRouter.use(this.config.options.route.version, this.versionRouter);
+    return this.middleware.create('apirouter', 101, this.rootRouter, this.config.options.route.root);
   }
 
 }
@@ -85,7 +97,10 @@ function DefaultMiddleware() : Middleware[] {
 export function ApiDefaultConfig(): ModuleConfig {
   let options = {
     welcome: process.env.APIMODULE_WELCOME || 'Welcome to the Modern-Mean API Module',
-    route: (process.env.APIMODULE_ROUTE || '/api') + '/:version'
+    route: {
+      root: process.env.APIMODULE_ROUTE_ROOT || '/api',
+      version: process.env.APIMODULE_ROUTE_VERSION || '/:version',
+    }
   };
   let config: ModuleConfig = createConfig('ApiModule');
   config.options = options;
