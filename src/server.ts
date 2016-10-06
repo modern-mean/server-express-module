@@ -2,7 +2,6 @@ import * as http from 'http';
 import * as https from 'https';
 import * as fs from 'fs';
 import { BaseModule, ModuleConfig, LoggerOptions, createConfig } from '@modern-mean/server-base-module';
-import { MiddlewareManager, Middleware } from './middleware';
 import { ExpressModule } from './express';
 
 export interface ServerOptions {
@@ -18,10 +17,8 @@ export interface ServerOptions {
 }
 
 export interface ServerModuleInterface {
-  middleware: MiddlewareManager,
   listen(): Promise<[ http.Server, https.Server | void ]>,
   destroy(): Promise<[ void, void ]>,
-  getExpressModule(): ExpressModule,
   getHttpServer(): http.Server,
   getHttpsServer(): https.Server
 }
@@ -32,18 +29,25 @@ export class ServerModule extends BaseModule implements ServerModuleInterface {
   protected httpServer: http.Server;
   protected httpsServer: https.Server;
   protected config: ModuleConfig;
-  public middleware: MiddlewareManager;
 
   constructor(...args) {
     super(ServerLoggerConfig(), ...args);
-
     this.logger.debug('Server::Constructor::Start');
+
+    args.forEach(arg => {
+      if (arg instanceof ExpressModule) {
+        this.express = arg;
+      }
+    });
 
     //Set Config
     this.config = this.configModule.defaults(ServerDefaultConfig());
 
-    //Express
-    this.express = new ExpressModule();
+    if (!this.express) {
+      //Express
+      this.express = new ExpressModule();
+    }
+
 
     //Servers
     this.httpServer = http.createServer(this.express.get());
@@ -149,10 +153,6 @@ export class ServerModule extends BaseModule implements ServerModuleInterface {
 
   getHttpsServer(): https.Server {
     return this.httpsServer;
-  }
-
-  getExpressModule(): ExpressModule {
-    return this.express;
   }
 
 }

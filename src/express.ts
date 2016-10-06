@@ -17,7 +17,6 @@ export interface ExpressModuleInterface {
 export class ExpressModule extends BaseModule implements ExpressModuleInterface {
 
   protected app: express.Application;
-  protected api: ApiModule;
   protected config: ModuleConfig;
   public middleware: MiddlewareManager;
 
@@ -36,9 +35,11 @@ export class ExpressModule extends BaseModule implements ExpressModuleInterface 
     this.middleware = new MiddlewareManager();
     this.middleware.add(DefaultMiddleware());
 
-
-    //Modules
-    this.api = new ApiModule();
+    args.forEach(arg => {
+      if (arg instanceof ApiModule) {
+        this.middleware.add([this.middleware.create('apirouter', 101, arg.get(), arg.config.options.route.root)]);
+      }
+    });
 
     this.logger.debug('Express::Constructor::Success');
 
@@ -49,17 +50,11 @@ export class ExpressModule extends BaseModule implements ExpressModuleInterface 
   }
 
   enable(): void {
-    //Enable API Module
-    this.middleware.add([this.api.enable()]);
     this.middleware.enable(this.app);
   }
 
   router(): express.Router {
     return express.Router();
-  }
-
-  getApiModule(): ApiModule {
-    return this.api;
   }
 
 }

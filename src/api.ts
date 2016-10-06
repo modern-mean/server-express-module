@@ -24,7 +24,8 @@ export interface ApiOptions {
 
 export interface ApiModuleInterface {
   middleware: MiddlewareManager,
-  getRouter(): express.Router
+  config: ModuleConfig,
+  get(): express.Router
 }
 
 export class ApiModule extends BaseModule implements ApiModuleInterface {
@@ -32,7 +33,7 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
   middleware: MiddlewareManager;
   protected rootRouter: express.Router;
   protected versionRouter: express.Router;
-  protected config: ModuleConfig;
+  public config: ModuleConfig;
 
   constructor(...args) {
 
@@ -42,7 +43,7 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
     this.config = this.configModule.defaults(ApiDefaultConfig());
 
     this.rootRouter = express.Router();
-    this.versionRouter = express.Router();
+
 
     this.rootRouter.param('version', (req: ApiRequest, res, next, id) => {
       req.apiversion = id;
@@ -55,26 +56,38 @@ export class ApiModule extends BaseModule implements ApiModuleInterface {
           res.json(this.config.options.welcome);
         });
 
-    this.versionRouter
-      .route('/')
+    //Set Middleware
+    this.middleware = new MiddlewareManager();
+    this.middleware.add(DefaultMiddleware());
+
+    this.versionRouter = express.Router();
+
+
+    this.versionRouter.route('/')
         .get((req: ApiRequest, res) => {
           res.json(this.config.options.welcome + ' Version: ' + req.apiversion);
         });
 
-    //Set Middleware
-    this.middleware = new MiddlewareManager();
-    this.middleware.add(DefaultMiddleware());
+
+
     this.logger.debug('ApiModule::Constructor::Done');
   }
 
-  getRouter(): express.Router {
-    return this.versionRouter;
+  get(): express.Router {
+    return this.rootRouter;
   }
 
-  enable(): Middleware {
-    this.middleware.enable(this.versionRouter);
-    this.rootRouter.use(this.config.options.route.version, this.versionRouter);
-    return this.middleware.create('apirouter', 101, this.rootRouter, this.config.options.route.root);
+  enable(): void {
+    this.middleware.enable(this.versionRouter)
+      .then(() => this.rootRouter.use(this.config.options.route.version, this.versionRouter));
+
+  }
+
+  router(name:string, priority: number, route: string): express.Router {
+    let router = express.Router();
+    let middleware = this.middleware.create(name, priority, router, route);
+    this.middleware.add([middleware]);
+    return router;
   }
 
 }

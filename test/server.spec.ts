@@ -98,12 +98,10 @@ test('server.ts destroy() error', (assert) => {
 
 test('server.ts start()', (assert) => {
   let sandbox = sinon.sandbox.create();
-  let enableSpy = sandbox.spy(moduleTest.getExpressModule(), 'enable');
   let listenSpy = sandbox.spy(moduleTest, 'listen');
   return moduleTest
     .start()
     .then(() => {
-      assert.equal(enableSpy.called, true, 'should call ExpressModule.enable()');
       assert.equal(listenSpy.called, true, 'should call ServerModule.listen()');
       sandbox.restore();
     })
